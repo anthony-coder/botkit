@@ -24,6 +24,18 @@ This is a sample Slack Button application that adds a bot to one or many slack t
     -> http://howdy.ai/botkit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
+
+//New code to add routes for slash commands and incoming webhooks
+/*
+var Request = require('request')
+var slack = require('../controllers/botkit')
+*/
+
+
+
+//end of new code
+
+
 /* Uses the slack button feature to offer a real time bot to multiple teams */
 var Botkit = require('../lib/Botkit.js');
 
@@ -65,6 +77,12 @@ function trackBot(bot) {
   _bots[bot.config.token] = bot;
 }
 
+controller.on('tasks', function(bot,message){
+
+	bot.replyPublic(message, 'Everyone can see this message');
+
+});
+
 
 controller.on('interactive_message_callback', function(bot, message) {
 
@@ -81,6 +99,15 @@ controller.on('interactive_message_callback', function(bot, message) {
             }
         }
 
+	//If user has empty list return 
+/*
+	if(user.list.length == 0)
+	{
+		var reply = { 'Your list is empty' }
+	}else
+	{
+*/
+
         for (var x = 0; x < user.list.length; x++) {
             if (user.list[x].id == item_id) {
                 if (message.actions[0].value=='flag') {
@@ -94,7 +121,7 @@ controller.on('interactive_message_callback', function(bot, message) {
 
 
         var reply = {
-            text: 'Here is <@' + user_id + '>s list:',
+            text: 'Here is <@' + user_id + '>s list of tasks:',
             attachments: [],
         }
 
@@ -122,15 +149,16 @@ controller.on('interactive_message_callback', function(bot, message) {
                           "ok_text": "Yes",
                           "dismiss_text": "No"
                         }
-                    }
+                    },
+			
+
+		    
                 ]
             })
         }
 
         bot.replyInteractive(message, reply);
         controller.storage.users.save(user);
-
-
     });
 
 });
@@ -173,7 +201,7 @@ controller.on('rtm_close',function(bot) {
 });
 
 
-controller.hears(['add (.*)'],'direct_mention,direct_message',function(bot,message) {
+controller.hears(['new task (.*)','add <item>'],'direct_mention,direct_message',function(bot,message) {
 
     controller.storage.users.get(message.user, function(err, user) {
 
@@ -207,7 +235,8 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 list: []
             }
         }
-
+	
+	
         if (!user.list || !user.list.length) {
             user.list = [
                 {
@@ -224,14 +253,14 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 }
             ]
         }
-
+	
         var reply = {
-            text: 'Here is your list. Say `add <item>` to add items.',
+            text: 'Here is your list of tasks. Type `new task <item>` to create a new task to the list',
             attachments: [],
         }
 
-        for (var x = 0; x < user.list.length; x++) {
-            reply.attachments.push({
+        	for (var x = 0; x < user.list.length; x++) {
+            	reply.attachments.push({
                 title: user.list[x].text + (user.list[x].flagged? ' *FLAGGED*' : ''),
                 callback_id: message.user + '-' + user.list[x].id,
                 attachment_type: 'default',
@@ -255,9 +284,10 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                           "dismiss_text": "No"
                         }
                     }
-                ]
-            })
-        }
+               	 ]
+            	})
+        	}
+	
 
         bot.reply(message, reply);
 
@@ -307,7 +337,7 @@ controller.on(['direct_message','mention','direct_mention'],function(bot,message
     name: 'robot_face',
   },function(err) {
     if (err) { console.log(err) }
-    bot.reply(message,'I heard you loud and clear boss.');
+    bot.reply(message,'Hello, RTM API is listening.');
   });
 });
 
