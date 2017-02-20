@@ -116,8 +116,14 @@ controller.on(['direct_message','mention','direct_mention'],function(bot,message
     channel: message.channel,
     name: 'robot_face',
   },function(err) {
+
+    var list = ['Lol I dont get it', ' ;) ', 'I have become conscious', 'Not sure I understood that', 'Naaah', 'Ummm..']
+
+    var random = Math.floor((Math.random() * 3) + 0);
+
+	
     if (err) { console.log(err) }
-    bot.reply(message,'I heard you loud and clear boss.');
+    bot.reply(message,list[random]);
   });
 });
 

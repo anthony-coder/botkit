@@ -208,6 +208,8 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
             }
         }
 
+
+	/*
         if (!user.list || !user.list.length) {
             user.list = [
                 {
@@ -224,7 +226,7 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 }
             ]
         }
-
+	*/
         var reply = {
             text: 'Here is your list. Say `add <item>` to add items.',
             attachments: [],
@@ -294,7 +296,14 @@ controller.hears('interactive', 'direct_message', function(bot, message) {
     });
 });
 
-
+/* controller.hears('interactive', 'direct_message, function(bot, message){
+ *
+ *
+ *
+ * }
+ *
+ *
+ * */
 controller.hears('^stop','direct_message',function(bot,message) {
   bot.reply(message,'Goodbye');
   bot.rtm.close();
@@ -331,3 +340,9 @@ controller.storage.teams.all(function(err,teams) {
   }
 
 });
+
+
+
+
+
+
