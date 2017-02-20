@@ -1,4 +1,4 @@
-FROM library/node:slim
+FROM node:slim
 
 COPY . /app
 
