@@ -235,14 +235,10 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 list: []
             }
         }
-<<<<<<< HEAD
 
-
-	/*
-=======
 	
 	
->>>>>>> 3530a7c9fd0f45abbc677cd958cddab1be9ca912
+
         if (!user.list || !user.list.length) {
             user.list = [
                 {
@@ -259,11 +255,8 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 }
             ]
         }
-<<<<<<< HEAD
-	*/
-=======
-	
->>>>>>> 3530a7c9fd0f45abbc677cd958cddab1be9ca912
+
+
         var reply = {
             text: 'Here is your list of tasks. Type `new task <item>` to create a new task to the list',
             attachments: [],
