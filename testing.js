@@ -26,13 +26,29 @@ var client = mongoose.model('Client', client_schema);
 var test_client = new client({client_name: "Test Client"});
 console.log(test_client.client_name);
 
+
 test_client.save(function (err, test_client) {
 
-if (err) return console.error(err);
 
-
+if (err)
+ return console.error(err);
+else
 console.log("Reached last if statement");
 });
+
+var test_2 = new client({client_name:"Client One", client_email:"sample@email.com"});
+console.log(test_2.client_email);
+
+client.find(function (err, test_client) {
+ if (err) return console.error(err);
+ 
+	console.log(test_client);
+
+});
+
+
+
+
 
 
 /*
