@@ -53,7 +53,7 @@ var controller = Botkit.slackbot({
   {
     clientId: process.env.clientId,
     clientSecret: process.env.clientSecret,
-    scopes: ['bot'],
+    scopes: ['bot', 'commands'],
   }
 );
 
@@ -189,6 +189,15 @@ controller.on('create_bot',function(bot,config) {
 
 });
 
+
+/*
+controller.ong('slash_command', function(slashCOmmand, message) {
+	switch(message.commmand){
+	case /echo: //handle the '/echo' slash command,.. We might have o
+
+}
+
+*/
 
 // Handle events related to the websocket connection to Slack
 controller.on('rtm_open',function(bot) {
