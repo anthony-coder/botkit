@@ -44,6 +44,18 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.port) {
   process.exit(1);
 }
 
+var config = {}
+if(process.env.MONGOLAB_URI) {
+	var BotkitStorage = require('botkit-storage-mongo');
+	config = {
+		storage: BotkitStorage({mongoUri: process.env.MONGOLAB_URI}),
+	};	
+}else {
+	config = {
+		json_file_store: './db_slackbutton_bot/',
+	};
+}
+
 
 var controller = Botkit.slackbot({
   // interactive_replies: true, // tells botkit to send button clicks into conversations
@@ -77,12 +89,37 @@ function trackBot(bot) {
   _bots[bot.config.token] = bot;
 }
 
+
+controller.on('slash_command', function(slashCommand,message){
+	switch(command, message) {
+	case "/nwi": //handle /echo slash commands, if message is empty assume querying for help
+			//verify tokens match
+		//if(message.token !== process.env.VERIFICATION_TOKEN) return;
+		
+		if(message.text === "" || message.text == "help") {
+	 	slashCommand.replyPrivate(message, "Try Typing '/nwi help'");
+	}
+
+	//logic to perform queries against mongodb
+
+	slashCommand.replyPublic(message, "Hello", function() {
+		slashCommand.replyPublicDelayed(message, "Yo").then(slashCommand.replyPublicDelayed(message,"Message Three"));
+	});
+
+	break;
+	default:
+	slashCommand.replyPublic(message, "I'm afraid I don't know how to " + message.command+ "yet. ");
+  }
+});
+
+
+/*
 controller.on('tasks', function(bot,message){
 
 	bot.replyPublic(message, 'Everyone can see this message');
 
 });
-
+*/
 
 controller.on('interactive_message_callback', function(bot, message) {
 
