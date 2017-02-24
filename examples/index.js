@@ -17,11 +17,6 @@ This is a sample Slack Button application that adds a bot to one or many slack t
 # USE THE APP
   Add the app to your Slack by visiting the login page:
     -> http://localhost:3000/login
-  After you've added the app, try talking to your bot!
-# EXTEND THE APP:
-  Botkit has many features for building cool and useful bots!
-  Read all about it here:
-    -> http://howdy.ai/botkit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 
