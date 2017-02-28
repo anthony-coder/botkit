@@ -24,8 +24,6 @@ This is a sample Slack Button application that adds a bot to one or many slack t
 /*
 var Request = require('request')
 var slack = require('../controllers/botkit')
-*/
-
 
 
 //end of new code
@@ -159,16 +157,10 @@ controller.on('interactive_message_callback', function(bot, message) {
 
         for (var x = 0; x < user.list.length; x++) {
             reply.attachments.push({
-                title: user.list[x].text + (user.list[x].flagged? ' *FLAGGED*' : ''),
+                title: user.list[x].text,
                 callback_id: user_id + '-' + user.list[x].id,
                 attachment_type: 'default',
                 actions: [
-                    {
-                        "name":"flag",
-                        "text": ":waving_black_flag: Flag",
-                        "value": "flag",
-                        "type": "button",
-                    },
                     {
                        "text": "Delete",
                         "name": "delete",
@@ -177,7 +169,7 @@ controller.on('interactive_message_callback', function(bot, message) {
                         "type": "button",
                         "confirm": {
                           "title": "Are you sure?",
-                          "text": "This will do something!",
+                          "text": "This will delete the task!",
                           "ok_text": "Yes",
                           "dismiss_text": "No"
                         }
@@ -194,7 +186,10 @@ controller.on('interactive_message_callback', function(bot, message) {
     });
 
 });
+/*Create Bot function
 
+
+*/
 
 controller.on('create_bot',function(bot,config) {
 
@@ -240,9 +235,53 @@ controller.on('rtm_close',function(bot) {
   console.log('** The RTM api just closed');
   // you may want to attempt to re-open
 });
+/*
+Edited: Anthony
 
 
-controller.hears(['new task (.*)','add <item>'],'direct_mention,direct_message',function(bot,message) {
+B E G I N ~ C O N T R O L L E R . H E A R S ~ M E T H O D S
+Begin creation of controller.hears(function)
+
+controller.hears(['keyword','^pattern$'],['message_received'],function(bot,message) {
+
+*/
+
+
+/**************************************************************************
+
+USER SETS ACCOUNT TYPE 
+
+
+User has the option to choose between a client or contractor accuont, but cannot be both at the same time. 
+***************************************************************************/
+
+
+controller.hears(['set account', 'login'], 'message_received,direct_mention,direct_message', function(bot,message) {
+	
+	controller.storage.users.get(message.user, function(err,user) {
+ 		if(!user) {
+			console.log("****************" + message.user)
+			user = { id : message.user, 
+				 list:[]
+				}
+		 	} 
+
+		});
+
+		//Testing the User Id response
+	        bot.reply(message, message.user);
+});
+
+
+/**********************************************************************
+* User creates a New Task. They bot will reply with a series of buttons that the user can use to define the 
+scope and services/tools they want to use
+Currently incuding: Docker, AWS, Google Cloud Platform, Azure, Contanerization
+
+*HOW TO USE: <------(must add to help in order for users to add message appropriately
+*
+*********************************************************************/
+controller.hears(['new task (.*)','add <item>'],'message_received, direct_mention,direct_message',function(bot,message) {
 
     controller.storage.users.get(message.user, function(err, user) {
 
@@ -254,9 +293,19 @@ controller.hears(['new task (.*)','add <item>'],'direct_mention,direct_message',
         }
 
         user.list.push({
-            id: message.ts,
+            id:   message.ts,
             text: message.match[1],
         });
+
+	/*When Task is created, query node-express-service-1 which also has access to MongoDB running locally in container
+
+	1. Set up node-express-service-1
+	2. Connect node-1 to mongoDB
+	3. when an update happens in mongoDB 
+								
+
+	*/
+	
 
         bot.reply(message,'Added to list. Say `list` to view or manage list.');
 
@@ -266,6 +315,41 @@ controller.hears(['new task (.*)','add <item>'],'direct_mention,direct_message',
 });
 
 
+/*controller.hears for help with commands usable with nwi chatops bot
+
+
+
+
+*/
+
+/*************************************************************
+* User enters help with a direct message or a direct mention
+* 
+*
+*
+*****************************************************************/
+
+controller.hears(['help', 'nwi help'], 'message_received, direct_mention, direct_message', function(bot, message) {
+
+	controller.storage.users.get(message.user, function(err, user) {
+
+	
+	});
+
+
+	//bot.reply(message, '
+
+	
+});
+
+/*
+hears for list and tasks to display current tasks
+
+
+
+
+
+*/
 controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,message) {
 
     controller.storage.users.get(message.user, function(err, user) {
@@ -276,10 +360,8 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 list: []
             }
         }
-
 	
-	
-
+	/*
         if (!user.list || !user.list.length) {
             user.list = [
                 {
@@ -296,25 +378,20 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 }
             ]
         }
-
+	*/
 
         var reply = {
             text: 'Here is your list of tasks. Type `new task <item>` to create a new task to the list',
-            attachments: [],
+           attachments: [],
         }
 
         	for (var x = 0; x < user.list.length; x++) {
             	reply.attachments.push({
-                title: user.list[x].text + (user.list[x].flagged? ' *FLAGGED*' : ''),
+                title: user.list[x].text,
                 callback_id: message.user + '-' + user.list[x].id,
                 attachment_type: 'default',
-                actions: [
-                    {
-                        "name":"flag",
-                        "text": ":waving_black_flag: Flag",
-                        "value": "flag",
-                        "type": "button",
-                    },
+                 actions: [
+                   
                     {
                        "text": "Delete",
                         "name": "delete",
@@ -328,8 +405,8 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                           "dismiss_text": "No"
                         }
                     }
-               	 ]
-            	})
+               	    ]
+            	   })
         	}
 	
 
