@@ -260,16 +260,47 @@ controller.hears(['set account', 'login'], 'message_received,direct_mention,dire
 	
 	controller.storage.users.get(message.user, function(err,user) {
  		if(!user) {
-			console.log("****************" + message.user)
-			user = { id : message.user, 
-				 list:[]
-				}
+			
+		user = { id : message.user, 
+			 list:[]
+ 			}
 		 	} 
-
 		});
 
+
+bot.replyInteractive(message, {
+    
+    "attachments":[
+        {
+            "text": "Select the account type",
+            "fallback": "You are unable to choose an account type",
+            "callback_id": "set_account",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "account",
+                    "text": "Client",
+                    "type": "button",
+                    "value": "client"
+                },
+                {
+                    "name" : "account",
+                    "text": "Contractor",
+                    "type": "button",
+                    "value": "contractor"
+                }
+            ]
+        }
+    ]
+});
+
+
 		//Testing the User Id response
-	        bot.reply(message, message.user);
+//	        bot.replyInteractive(message, reply);
+
+
+		
 });
 
 
@@ -404,7 +435,23 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 list: []
             }
         }
+/*
+	var service = new function() {
+	
+	
+	}
+
+*/	//var service = { name='Docker', flagged=0 };
+
+
+
 var services = ['Docker', 'AWS', 'Azure', 'Containerization'];	
+/*	
+	var services = {
+		
+
+	}
+*/
 	/*
         if (!user.list || !user.list.length) {
             user.list = [
@@ -425,7 +472,7 @@ var services = ['Docker', 'AWS', 'Azure', 'Containerization'];
 	*/
 
         var reply = {
-            text: 'Here is your list of tasks. Type `new task <item>` to create a new task to the list',
+            text: 'Select relevant services that your task is relatd to.',
            attachments: [],
         }
 
