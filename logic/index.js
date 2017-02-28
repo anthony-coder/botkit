@@ -283,6 +283,19 @@ Currently incuding: Docker, AWS, Google Cloud Platform, Azure, Contanerization
 *********************************************************************/
 controller.hears(['new task (.*)','add <item>'],'message_received, direct_mention,direct_message',function(bot,message) {
 
+
+	var services = ["Docker", "AWS", "Azure", "Containerization"];
+
+
+/*controller.storage.users.get(user_id, function(err, user) {
+
+        if (!user) {
+            user = {
+                id: user_id,
+                list: []
+            }
+        }
+*/
     controller.storage.users.get(message.user, function(err, user) {
 
         if (!user) {
@@ -291,12 +304,12 @@ controller.hears(['new task (.*)','add <item>'],'message_received, direct_mentio
                 list: []
             }
         }
-
+/*
         user.list.push({
             id:   message.ts,
             text: message.match[1],
         });
-
+*/
 	/*When Task is created, query node-express-service-1 which also has access to MongoDB running locally in container
 
 	1. Set up node-express-service-1
@@ -305,11 +318,42 @@ controller.hears(['new task (.*)','add <item>'],'message_received, direct_mentio
 								
 
 	*/
+	         var reply = {
+			
+			text: "Please select relevant services",
+			attachments:[],
+		}	
 	
 
-        bot.reply(message,'Added to list. Say `list` to view or manage list.');
+		for(var x = 0; x < services.length; x++) {
+                reply.attachments.push({
+                title: services[x],
+                callback_id: message.user + '-' + user.id,
+                attachment_type: 'default',
+                 actions: [
 
-        controller.storage.users.save(user);
+                    {
+                       "text": "docker",
+                        "name": "docker",
+                        "style": "danger",
+                        "type": "button",
+                        "confirm": {
+                          "title": "Are you sure?",
+                          "text": "This will do something!",
+                          "ok_text": "Yes",
+                          "dismiss_text": "No"
+                        }
+                    }
+                    ]
+                   })
+
+
+		console.log("WIthin for Loop " + x);
+                }
+
+	bot.replyInteractive(message,reply)
+
+  //      controller.storage.users.save(user);
 
     });
 });
@@ -360,7 +404,7 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 list: []
             }
         }
-	
+var services = ['Docker', 'AWS', 'Azure', 'Containerization'];	
 	/*
         if (!user.list || !user.list.length) {
             user.list = [
@@ -385,18 +429,21 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
            attachments: [],
         }
 
-        	for (var x = 0; x < user.list.length; x++) {
+        	
+	
+
+
+		for (var x = 0; x < services.length; x++) {
             	reply.attachments.push({
-                title: user.list[x].text,
+		title: services[x],
                 callback_id: message.user + '-' + user.list[x].id,
                 attachment_type: 'default',
                  actions: [
                    
                     {
-                       "text": "Delete",
-                        "name": "delete",
-                        "value": "delete",
-                        "style": "danger",
+                       "text":services[x],
+                        "name": services[x],
+                        "value": services[x],
                         "type": "button",
                         "confirm": {
                           "title": "Are you sure?",
@@ -407,8 +454,11 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                     }
                	    ]
             	   })
+
+		console.log("Within For Loop" + x);
+		console.log(reply.attachments[x]);
         	}
-	
+//	console.log(reply.attachments
 
         bot.reply(message, reply);
 
