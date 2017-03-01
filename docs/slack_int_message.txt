@@ -1,0 +1,38 @@
+#This document is intended to highliht the slack interactive message "dance" 
+
+
+
+
+1. Slack bot sends message into User channel in response to a keyword
+
+2. The user interacts with the message by clicking the buttons. This triggers an invocation of your appliction's associated "Action" URL. (still unclear what URL is best practice is it domain.com/slack/receive/?
+
+
+3. Slack sends a request to Action URL, sending all information needed to identify the originating message, the user that executed the action, and the specific values you've associated with the button. 
+
+
+Constructing an Interactive message
+
+{
+	"text": "Main Text in Message",
+	"attachments": [
+	//This attachemnts field is an array of "actions" (aka buttons)
+		{
+			"text": "Text shown directly above the buttons",
+			"fallback": "THis is an error response",
+			"callback_id": "callback_id returned to Action URL when button clicked ",
+			"attachment_type":"default",
+			"actions": [
+				
+				{
+					"name":"name of button creturned the the call back URL",
+					"text": "Text shown on button",
+					"type": "button",
+					"value" : "value of the clicked button"
+				}
+
+			]
+			
+		}
+
+ }

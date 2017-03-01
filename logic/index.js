@@ -117,9 +117,13 @@ controller.on('tasks', function(bot,message){
 controller.on('interactive_message_callback', function(bot, message) {
 
     var ids = message.callback_id.split(/\-/);
+
+	
     var user_id = ids[0];
     var item_id = ids[1];
-
+	
+	console.log("************************************************************");
+	console.log(ids);
     controller.storage.users.get(user_id, function(err, user) {
 
         if (!user) {
@@ -129,15 +133,7 @@ controller.on('interactive_message_callback', function(bot, message) {
             }
         }
 
-	//If user has empty list return 
-/*
-	if(user.list.length == 0)
-	{
-		var reply = { 'Your list is empty' }
-	}else
-	{
-*/
-
+	console.log("************************* Before for loop **************");
         for (var x = 0; x < user.list.length; x++) {
             if (user.list[x].id == item_id) {
                 if (message.actions[0].value=='flag') {
@@ -154,7 +150,7 @@ controller.on('interactive_message_callback', function(bot, message) {
             text: 'Here is <@' + user_id + '>s list of tasks:',
             attachments: [],
         }
-
+	
         for (var x = 0; x < user.list.length; x++) {
             reply.attachments.push({
                 title: user.list[x].text,
