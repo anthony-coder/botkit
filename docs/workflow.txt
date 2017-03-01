@@ -1,0 +1,83 @@
+1. Download nwi-chatops
+2. Login as either Client or Contractor
+
+
+
+Client New Task Workflow
+
+1. Client : Add new Task Workflow
+	Who: Client
+	What: Creating a new task with meta-data using interactive buttons
+	Where: Slack bot running from app-container, scrap-service queying mongodb 
+
+
+ Client enters tasks
+        i.   Bot returns with list of services that are currently supported
+        ii.  Client selects n amount of services by clicking buttons
+        iii. Click "Done"
+	iv.  Bot creates new new_task and adds to client_uid.oustanding_task list
+	v.   Bot responds with "Thanks for your entry! We are working on finding a match for you"
+
+2. node-scrape-service
+
+
+
+/************************************************************************************************************
+	Who: node-scrape-services
+	What: performs repeated queries 
+	Overview: new task -> matchMake -> client_notfication - > client adds details -> contractor is notified
+	
+Once contractor is notified:
+	
+	//the task will have a bid price and time added to the task created
+	// client-notified of bid and price and either accepts or rejects
+
+	
+		contractor places bid -> update the task with bid and time, -> client notified with bid and time -> yes or no 
+
+	
+	When the contractor is notified, they must enter more informatin about the task
+****************************************************************************************************************/
+
+
+	i. 
+
+	   if( for all clients.oustanding_tasks != null)
+	   {
+			//the matchmaking function passes a client (the noun list of technologies)
+			//and perfoms a simple string comparison for all contractors.tech_list in 
+			//DB, returns the uid of the contracter with most matches with client
+			//noun list
+			//
+			returns uid matchMake(client id);
+
+
+			//Reaches this part when the match is made 
+
+			next step -> notify the client that there was a match made, 
+			(Q : Does the task stay in outstanding tasks? 
+			 A : Yes   ) 
+			
+		
+	// task -> matches -> client notification -> client inputs details -> notify contractor
+	// after this process, the client is notified
+	
+	
+			
+			
+	}  
+	 
+
+fin 
+
+	
+	
+
+
+
+
+2. node-scrap-service
+
+
+
+	Task si added to otustanding task list in DB 
