@@ -82,7 +82,7 @@ function trackBot(bot) {
   _bots[bot.config.token] = bot;
 }
 
-
+/*
 controller.on('slash_command', function(slashCommand,message){
 	switch(command, message) {
 	case "/nwi": //handle /echo slash commands, if message is empty assume querying for help
@@ -104,20 +104,11 @@ controller.on('slash_command', function(slashCommand,message){
 	slashCommand.replyPublic(message, "I'm afraid I don't know how to " + message.command+ "yet. ");
   }
 });
-
-
-/*
-controller.on('tasks', function(bot,message){
-
-	bot.replyPublic(message, 'Everyone can see this message');
-
-});
 */
 
 controller.on('interactive_message_callback', function(bot, message) {
 
     var ids = message.callback_id.split(/\-/);
-
 	
     var user_id = ids[0];
     var item_id = ids[1];
@@ -145,12 +136,12 @@ controller.on('interactive_message_callback', function(bot, message) {
             }
         }
 
-
         var reply = {
             text: 'Here is <@' + user_id + '>s list of tasks:',
             attachments: [],
-        }
-	
+        
+	}
+		
         for (var x = 0; x < user.list.length; x++) {
             reply.attachments.push({
                 title: user.list[x].text,
