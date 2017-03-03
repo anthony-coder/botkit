@@ -10,8 +10,7 @@ This is a sample Slack Button application that adds a bot to one or many slack t
 
 # RUN THE APP:
   Create a Slack app. Make sure to configure the bot user!
-    -> https://api.slack.com/applications/new
-    -> Add the Redirect URI: http://localhost:3000/oauth
+q    -> https://api.slack.com/applications/new   -> Add the Redirect URI: http://localhost:3000/oauth
   Run your bot from the command line:
     clientId=<my client id> clientSecret=<my client secret> port=3000 node slackbutton_bot_interactivemsg.js
 # USE THE APP
@@ -23,20 +22,38 @@ This is a sample Slack Button application that adds a bot to one or many slack t
 //New code to add routes for slash commands and incoming webhooks
 /*
 var Request = require('request')
-var slack = require('../controllers/botkit')
-
-
-//end of new code
-
+var slack = require('../controllers/botkit
 
 /* Uses the slack button feature to offer a real time bot to multiple teams */
-var Botkit = require('../lib/Botkit.js');
+var Botkit = require('../lib/Botkit.js'),
+	mongoStorage = require('botkit-storage-mongo')({mongoUri:'localhost:27017'}),
+	controller = Botkit.slackbot({
+		storage: mongoStorage
+});
+var controller = Botkit.slackbot({
+		storage: mongoStorage
+ }).configureSlackApp({
+	clientId: process.env.clientId,
+	clientSecret: process.env.clientSecret,
+	scopes: ['bot', 'commands'],
+});
 
+
+
+/*
+.configureSlackApp( {
+	clientId: process.env.clientId,
+	clientSecret: process.env.clientSecret,
+	scopes: ['bot','commands'],
+	})
+);
+*/
 if (!process.env.clientId || !process.env.clientSecret || !process.env.port) {
   console.log('Error: Specify clientId clientSecret and port in environment');
   process.exit(1);
 }
 
+/*
 var config = {}
 if(process.env.MONGOLAB_URI) {
 	var BotkitStorage = require('botkit-storage-mongo');
@@ -48,8 +65,8 @@ if(process.env.MONGOLAB_URI) {
 		json_file_store: './db_slackbutton_bot/',
 	};
 }
-
-
+*/
+/*
 var controller = Botkit.slackbot({
   // interactive_replies: true, // tells botkit to send button clicks into conversations
   json_file_store: './db_slackbutton_bot/',
@@ -61,6 +78,8 @@ var controller = Botkit.slackbot({
     scopes: ['bot', 'commands'],
   }
 );
+*/
+
 
 controller.setupWebserver(process.env.port,function(err,webserver) {
   controller.createWebhookEndpoints(controller.webserver);
