@@ -6,7 +6,7 @@ res.send("Node-Express-Server-1");
 
 });
 
-app.get('/
+//app.get('/
 
 
 app.listen(3001);

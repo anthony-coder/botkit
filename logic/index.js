@@ -4,7 +4,7 @@
           \ \  __<   \ \ \/\ \  \/_/\ \/ \ \  _"-.  \ \ \  \/_/\ \/
            \ \_____\  \ \_____\    \ \_\  \ \_\ \_\  \ \_\    \ \_\
             \/_____/   \/_____/     \/_/   \/_/\/_/   \/_/     \/_/
-
+asdf
 
 This is a sample Slack Button application that adds a bot to one or many slack teams.
 
@@ -25,8 +25,12 @@ var Request = require('request')
 var slack = require('../controllers/botkit
 
 /* Uses the slack button feature to offer a real time bot to multiple teams */
+
+var mongoose = require('mongoose');
+
+
 var Botkit = require('../lib/Botkit.js'),
-	mongoStorage = require('botkit-storage-mongo')({mongoUri:'localhost:27017'}),
+	mongoStorage = require('botkit-storage-mongo')({mongoUri:'mongodb://admin:password@localhost:27017/test'}),
 	controller = Botkit.slackbot({
 		storage: mongoStorage
 });
@@ -128,7 +132,7 @@ controller.on('slash_command', function(slashCommand,message){
 controller.on('interactive_message_callback', function(bot, message) {
 
     var ids = message.callback_id.split(/\-/);
-	
+ 
     var user_id = ids[0];
     var item_id = ids[1];
 	
@@ -142,7 +146,11 @@ controller.on('interactive_message_callback', function(bot, message) {
                 list: []
             }
         }
+	
 
+
+
+	
 	console.log("************************* Before for loop **************");
         for (var x = 0; x < user.list.length; x++) {
             if (user.list[x].id == item_id) {
@@ -264,17 +272,39 @@ User has the option to choose between a client or contractor accuont, but cannot
 
 controller.hears(['set account', 'login'], 'message_received,direct_mention,direct_message', function(bot,message) {
 	
+	
+	//mongoose.connect('mongodb://localhost/27017/test');
+
+	
+	var Client = mongoose.model('Client', client_schema);
+
+	var Consultant = mongoose.model('Consultant', consultant_schema)
+	
+	Client.findOne({'client_uid': message.user.id }, function(err, client){
+		
+	if(err) return handleError(err);
+	console.log('****************************************************8There is an existing account with this user id');
+	}) 
+
+	controller.storage.users.save(Client);
+
+
+
+	client = controller.storage.users.get(message.user.id);
+
+	console.log(message.user.id + "**************************************");
+/*
 	controller.storage.users.get(message.user, function(err,user) {
  		if(!user) {
-			
+		console.log("*******************************************************If !User*************************");	
 		user = { id : message.user, 
 			 list:[]
  			}
 		 	} 
 		});
 
-
-bot.replyInteractive(message, {
+*/
+bot.reply(message, {
     
     "attachments":[
         {
@@ -319,7 +349,7 @@ Currently incuding: Docker, AWS, Google Cloud Platform, Azure, Contanerization
 *
 *********************************************************************/
 controller.hears(['new task (.*)','add <item>'],'message_received, direct_mention,direct_message',function(bot,message) {
-
+console.log("*******Made it within new task********************");
 
 	var services = ["Docker", "AWS", "Azure", "Containerization"];
 
@@ -333,14 +363,17 @@ controller.hears(['new task (.*)','add <item>'],'message_received, direct_mentio
             }
         }
 */
-    controller.storage.users.get(message.user, function(err, user) {
+/*    controller.storage.users.get(message.user, function(err, user) {
 
         if (!user) {
             user = {
                 id: message.user,
                 list: []
             }
-        }
+  
+
+
+      }
 /*
         user.list.push({
             id:   message.ts,
@@ -355,13 +388,18 @@ controller.hears(['new task (.*)','add <item>'],'message_received, direct_mentio
 								
 
 	*/
+
+	var user = { id: message.user, list:[] }
+
+
+		
 	         var reply = {
 			
 			text: "Please select relevant services",
 			attachments:[],
 		}	
 	
-
+/*
 		for(var x = 0; x < services.length; x++) {
                 reply.attachments.push({
                 title: services[x],
@@ -384,16 +422,15 @@ controller.hears(['new task (.*)','add <item>'],'message_received, direct_mentio
                     ]
                    })
 
-
+		}
 		console.log("WIthin for Loop " + x);
-                }
+*/
 
-	bot.replyInteractive(message,reply)
+	bot.reply(message,reply);
 
-  //      controller.storage.users.save(user);
+      //controller.storage.users.save(user);
 
     });
-});
 
 
 /*controller.hears for help with commands usable with nwi chatops bot
@@ -595,6 +632,46 @@ controller.storage.teams.all(function(err,teams) {
 
 
 
+
+
+/***********************************************************************************************
+
+
+Mongoose schema definitions
+
+****************************************/
+var client_schema = new mongoose.Schema({
+
+id: Number,
+client_name : String,
+client_email: String,
+client_limit: Number,
+oustanding_tasks : [String],
+inprogress_tasks : [String],
+finished_tasks : [String],
+tentative_finished_tasks: [String]
+
+});
+
+var consultant_schema = new mongoose.Schema({
+
+   id : Number,
+    consul_name: String,
+    consul_email: String,
+    oustanding_tasks : [String],
+    inprogress_tasks: [String],
+    to_be_confirmed: [String],
+    skill_list: [String]
+
+});
+
+var task = new mongoose.Schema({
+    client_uid: Number,
+    consul_uid: Number,
+    task_id: Number,
+    skill_list: [String],
+	id: Number
+});
 
 
 
