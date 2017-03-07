@@ -71,15 +71,10 @@ function trackBot(bot) {
 //This method is for interactice message_callback functionality
 controller.on('interactive_message_callback', function(bot, message) {
 
-
-
-	
-
     var ids = message.callback_id.split(/\-/);
  
     var user_id = ids[0];
     var item_id = ids[1];
-	
 	console.log("************************************************************");
 	console.log(ids);
     controller.storage.users.get(user_id, function(err, user) {
@@ -92,6 +87,8 @@ controller.on('interactive_message_callback', function(bot, message) {
             }
         }
 	
+	//Switch statement for interactive message call_back
+	//
 
 
 	switch(message.callback_id)
@@ -104,9 +101,9 @@ controller.on('interactive_message_callback', function(bot, message) {
 		
 		//Statemente executed when thte result of espression matches set_account
 		if(message.actions[0].value == 'client')
-		{	controller.storage.users.save({id: message.user, account:'client'}, function(err) {});
-
-		}
+		{	controller.storage.users.save({id: message.user, account:'client', balance:1000, }, function(err) {});
+	
+		}	
 		else
 		{	
 			controller.storage.users.save({id:message.user, account:'consultant'}, function(err) {});
@@ -118,54 +115,9 @@ controller.on('interactive_message_callback', function(bot, message) {
 		break;
 		
 	}
-	/*
-	console.log("************************* Before for loop **************");
-        for (var x = 0; x < user.list.length; x++) {
-            if (user.list[x].id == item_id) {
-                if (message.actions[0].value=='flag') {
-                    user.list[x].flagged = !user.list[x].flagged;
-                }
-                if (message.actions[0].value=='delete') {
-                    user.list.splice(x,1);
-                }
-            }
-        }
 
-        var reply = {
-            text: 'Here is <@' + user_id + '>s list of tasks:',
-            attachments: [],
-        
-	}
-		
-        for (var x = 0; x < user.list.length; x++) {
-            reply.attachments.push({
-                title: user.list[x].text,
-                callback_id: user_id + '-' + user.list[x].id,
-                attachment_type: 'default',
-                actions: [
-                    {
-                       "text": "Delete",
-                        "name": "delete",
-                        "value": "delete",
-                        "style": "danger",
-                        "type": "button",
-                        "confirm": {
-                          "title": "Are you sure?",
-                          "text": "This will delete the task!",
-                          "ok_text": "Yes",
-                          "dismiss_text": "No"
-                        }
-                    },
-			
 
-		    
-                ]
-            })
-        }
-
-        bot.replyInteractive(message, reply);
-        controller.storage.users.save(user);
-    });*/
+   
 
 	});
 
@@ -225,8 +177,9 @@ USER SETS ACCOUNT TYPE
 
 User has the option to choose between a client or contractor accuont, but cannot be both at the same time. 
 ***************************************************************************/
-
-controller.hears(['set account (.*)', 'login (.*)'], 'message_received,direct_mention,direct_message', function(bot,message) {
+//This controller method allows users to change account type from client to consultant and back
+//functional as of 3/7
+controller.hears(['set account', 'login'], 'message_received,direct_mention,direct_message', function(bot,message) {
 	
 	//var user = {id: message.user, account: message.match[1], oustanding_tasks: [] };
 	//controller.storage.users.save(user);
@@ -242,7 +195,7 @@ controller.hears(['set account (.*)', 'login (.*)'], 'message_received,direct_me
 			user =  {
 				id: message.user, 
 				list: [],
-				accountType: message.match[1]
+				accountType: "",
 			}
 		}
 
@@ -268,9 +221,9 @@ bot.reply(message, {
                 },
                 {
                     "name" : "account",
-                    "text": "Contractor",
+                    "text": "Consultant",
                     "type": "button",
-                    "value": "contractor"
+                    "value": "consultant"
                 }
             ]
         }
@@ -302,6 +255,57 @@ bot.reply(message, {
 }); //end of main controller
 	
 });
+
+/*********************************************************************
+Retrieve profile information 
+************************************************************************/
+controller.hears(['get account information', 'account', 'account info'],'message_received,direct_mention,direct_message', function(bot, message){
+
+console.log("**************** within get account info controller****");
+
+	//begin controller storage query
+	controller.storage.users.get(message.user, function(err, user) {
+	
+		if(!user) {
+				
+		console.log("There is currently no account information- enter login to set an account type");
+		}
+
+
+		var reply = { text: 'Here is your current account information', 
+				attachments: [ {
+						
+
+						'title': 'Account Information',
+						'fields' : [{'title': 'User ID',
+								'value': message.user,
+								'short': true
+								},
+							    	{ 
+								'title': 'Account Type',
+								'value': user.account,
+								'short' : true
+								}
+						
+							]			
+					      }]
+					
+		} 
+
+
+
+
+		bot.reply(message, reply);
+	});
+
+
+	
+	});//end controller storage query
+
+
+//});
+
+
 
 /**********************************************************************
 * User creates a New Task. They bot will reply with a series of buttons that the user can use to define the 
