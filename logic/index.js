@@ -43,48 +43,11 @@ var controller = Botkit.slackbot({
 });
 
 
-
-/*
-.configureSlackApp( {
-	clientId: process.env.clientId,
-	clientSecret: process.env.clientSecret,
-	scopes: ['bot','commands'],
-	})
-);
-*/
 if (!process.env.clientId || !process.env.clientSecret || !process.env.port) {
   console.log('Error: Specify clientId clientSecret and port in environment');
   process.exit(1);
 }
-
-/*
-var config = {}
-if(process.env.MONGOLAB_URI) {
-	var BotkitStorage = require('botkit-storage-mongo');
-	config = {
-		storage: BotkitStorage({mongoUri: process.env.MONGOLAB_URI}),
-	};	
-}else {
-	config = {
-		json_file_store: './db_slackbutton_bot/',
-	};
-}
-*/
-/*
-var controller = Botkit.slackbot({
-  // interactive_replies: true, // tells botkit to send button clicks into conversations
-  json_file_store: './db_slackbutton_bot/',
-  // rtm_receive_messages: false, // disable rtm_receive_messages if you enable events api
-}).configureSlackApp(
-  {
-    clientId: process.env.clientId,
-    clientSecret: process.env.clientSecret,
-    scopes: ['bot', 'commands'],
-  }
-);
-*/
-
-
+//SET UP WEB SERVER
 controller.setupWebserver(process.env.port,function(err,webserver) {
   controller.createWebhookEndpoints(controller.webserver);
 
@@ -105,31 +68,12 @@ function trackBot(bot) {
   _bots[bot.config.token] = bot;
 }
 
-/*
-controller.on('slash_command', function(slashCommand,message){
-	switch(command, message) {
-	case "/nwi": //handle /echo slash commands, if message is empty assume querying for help
-			//verify tokens match
-		//if(message.token !== process.env.VERIFICATION_TOKEN) return;
-		
-		if(message.text === "" || message.text == "help") {
-	 	slashCommand.replyPrivate(message, "Try Typing '/nwi help'");
-	}
-
-	//logic to perform queries against mongodb
-
-	slashCommand.replyPublic(message, "Hello", function() {
-		slashCommand.replyPublicDelayed(message, "Yo").then(slashCommand.replyPublicDelayed(message,"Message Three"));
-	});
-
-	break;
-	default:
-	slashCommand.replyPublic(message, "I'm afraid I don't know how to " + message.command+ "yet. ");
-  }
-});
-*/
-
+//This method is for interactice message_callback functionality
 controller.on('interactive_message_callback', function(bot, message) {
+
+
+
+	
 
     var ids = message.callback_id.split(/\-/);
  
@@ -143,14 +87,38 @@ controller.on('interactive_message_callback', function(bot, message) {
         if (!user) {
             user = {
                 id: user_id,
+		
                 list: []
             }
         }
 	
 
 
+	switch(message.callback_id)
+	{
 
-	
+		case 'set_account':
+		console.log("**********message.actions*************************" + message.actions[0].value);
+
+
+		
+		//Statemente executed when thte result of espression matches set_account
+		if(message.actions[0].value == 'client')
+		{	controller.storage.users.save({id: message.user, account:'client'}, function(err) {});
+
+		}
+		else
+		{	
+			controller.storage.users.save({id:message.user, account:'consultant'}, function(err) {});
+		}
+		
+
+
+		bot.replyInteractive(message, "Changed account type to: " + message.actions[0].value);
+		break;
+		
+	}
+	/*
 	console.log("************************* Before for loop **************");
         for (var x = 0; x < user.list.length; x++) {
             if (user.list[x].id == item_id) {
@@ -197,14 +165,17 @@ controller.on('interactive_message_callback', function(bot, message) {
 
         bot.replyInteractive(message, reply);
         controller.storage.users.save(user);
-    });
+    });*/
 
-});
+	});
+
+
+}); //end of main controller method
 /*Create Bot function
 
 
 */
-
+//This method is triggered when a bot is first added to a team
 controller.on('create_bot',function(bot,config) {
 
   if (_bots[bot.config.token]) {
@@ -230,16 +201,6 @@ controller.on('create_bot',function(bot,config) {
 
 });
 
-
-/*
-controller.ong('slash_command', function(slashCOmmand, message) {
-	switch(message.commmand){
-	case /echo: //handle the '/echo' slash command,.. We might have o
-
-}
-
-*/
-
 // Handle events related to the websocket connection to Slack
 controller.on('rtm_open',function(bot) {
   console.log('** The RTM api just connected!');
@@ -251,16 +212,12 @@ controller.on('rtm_close',function(bot) {
 });
 /*
 Edited: Anthony
-
-
 B E G I N ~ C O N T R O L L E R . H E A R S ~ M E T H O D S
 Begin creation of controller.hears(function)
 
 controller.hears(['keyword','^pattern$'],['message_received'],function(bot,message) {
 
 */
-
-
 /**************************************************************************
 
 USER SETS ACCOUNT TYPE 
@@ -269,43 +226,32 @@ USER SETS ACCOUNT TYPE
 User has the option to choose between a client or contractor accuont, but cannot be both at the same time. 
 ***************************************************************************/
 
+controller.hears(['set account (.*)', 'login (.*)'], 'message_received,direct_mention,direct_message', function(bot,message) {
+	
+	//var user = {id: message.user, account: message.match[1], oustanding_tasks: [] };
+	//controller.storage.users.save(user);
 
-controller.hears(['set account', 'login'], 'message_received,direct_mention,direct_message', function(bot,message) {
+	user = controller.storage.users.get(message.user);
 	
 	
-	//mongoose.connect('mongodb://localhost/27017/test');
-
 	
-	var Client = mongoose.model('Client', client_schema);
 
-	var Consultant = mongoose.model('Consultant', consultant_schema)
+	controller.storage.users.get(message.user, function(err, user) {
 	
-	Client.findOne({'client_uid': message.user.id }, function(err, client){
-		
-	if(err) return handleError(err);
-	console.log('****************************************************8There is an existing account with this user id');
-	}) 
+		if(!user) {
+			user =  {
+				id: message.user, 
+				list: [],
+				accountType: message.match[1]
+			}
+		}
 
-	controller.storage.users.save(Client);
+	console.log("***********REACHED SAVED USERS***********************");
+	controller.storage.users.save(user);
+	console.log("***********AFTER SAVED USERS*************************");
 
-
-
-	client = controller.storage.users.get(message.user.id);
-
-	console.log(message.user.id + "**************************************");
-/*
-	controller.storage.users.get(message.user, function(err,user) {
- 		if(!user) {
-		console.log("*******************************************************If !User*************************");	
-		user = { id : message.user, 
-			 list:[]
- 			}
-		 	} 
-		});
-
-*/
 bot.reply(message, {
-    
+
     "attachments":[
         {
             "text": "Select the account type",
@@ -332,13 +278,30 @@ bot.reply(message, {
 });
 
 
+
+
+
+
+
+
+/*
+	controller.storage.users.get(message.user, function(err,user) {
+	if(!user) {
+		console.log("*******************************************************If !User*************************");	
+		user = { id : message.user, 
+			 list:[]
+ 			}
+		 	} 
+		});	
+
+
+*/
 		//Testing the User Id response
 //	        bot.replyInteractive(message, reply);
 
-
-		
+}); //end of main controller
+	
 });
-
 
 /**********************************************************************
 * User creates a New Task. They bot will reply with a series of buttons that the user can use to define the 
@@ -432,12 +395,7 @@ console.log("*******Made it within new task********************");
 
     });
 
-
 /*controller.hears for help with commands usable with nwi chatops bot
-
-
-
-
 */
 
 /*************************************************************
@@ -489,39 +447,11 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
 
 
 var services = ['Docker', 'AWS', 'Azure', 'Containerization'];	
-/*	
-	var services = {
-		
-
-	}
-*/
-	/*
-        if (!user.list || !user.list.length) {
-            user.list = [
-                {
-                    'id': 1,
-                    'text': 'Test Item 1'
-                },
-                {
-                    'id': 2,
-                    'text': 'Test Item 2'
-                },
-                {
-                    'id': 3,
-                    'text': 'Test Item 3'
-                }
-            ]
-        }
-	*/
 
         var reply = {
             text: 'Select relevant services that your task is relatd to.',
            attachments: [],
         }
-
-        	
-	
-
 
 		for (var x = 0; x < services.length; x++) {
             	reply.attachments.push({
@@ -585,14 +515,7 @@ controller.hears('interactive', 'direct_message', function(bot, message) {
     });
 });
 
-/* controller.hears('interactive', 'direct_message, function(bot, message){
- *
- *
- *
- * }
- *
- *
- * */
+
 controller.hears('^stop','direct_message',function(bot,message) {
   bot.reply(message,'Goodbye');
   bot.rtm.close();
