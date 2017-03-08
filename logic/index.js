@@ -68,7 +68,7 @@ function trackBot(bot) {
   _bots[bot.config.token] = bot;
 }
 
-//This method is for interactice message_callback functionality
+//This method is for interactive message_callback functionality. All button message interactions are passed back to this function 
 controller.on('interactive_message_callback', function(bot, message) {
 
     var ids = message.callback_id.split(/\-/);
@@ -89,32 +89,89 @@ controller.on('interactive_message_callback', function(bot, message) {
 	
 	//Switch statement for interactive message call_back
 	//
-
-
 	switch(message.callback_id)
 	{
-
+		//This case is for setting a users account 
 		case 'set_account':
 		console.log("**********message.actions*************************" + message.actions[0].value);
-
-
 		
 		//Statemente executed when thte result of espression matches set_account
 		if(message.actions[0].value == 'client')
-		{	controller.storage.users.save({id: message.user, account:'client', balance:1000, }, function(err) {});
+		{	controller.storage.users.save({id: message.user, account:'client'}, function(err) {});
 	
 		}	
 		else
 		{	
 			controller.storage.users.save({id:message.user, account:'consultant'}, function(err) {});
 		}
-		
-
-
+		//Respond back with the changed account type
 		bot.replyInteractive(message, "Changed account type to: " + message.actions[0].value);
 		break;
 		
-	}
+		//This case is for a new task created. The user will select buttons relevant to consulting project
+	case 'new_task':
+/*			
+	  if (!user.task_list || !user.task_list.length) {
+	      user.task_list = [
+		  {
+		      'id': 1,
+		      'text': 'Docker'
+		  },
+		  {
+		      'id': 2,
+		      'text': 'Containerization'
+		  },
+		      {
+			 'id': 3,
+			  'text':'AWS'
+		      },
+		  {
+		      'id': 4,
+		      'text': 'Azure'
+		  },
+		      {
+		      'id': 5,
+		      'text' : 'Cloud Platforms'
+		      }
+		  ]
+	    }			
+			
+*/		for(var x = 0; x < user.task_list.length; x++) {
+		
+			if(message.actions[0].value=='flag'){
+				if(message.actions[0].value=='flag'){
+			
+					user.task_list[x].flagged = !user.task_list[x].flagged;
+			
+				}
+			}
+
+		}
+	     var reply = {text: 'Services', attachments: []}
+	    for(var x = 0; x < user.task_list.length; x++)
+	    {
+	      reply.attachments.push({
+		title: user.task_list[x].text + (user.task_list[x].flagged? ' * SELECTED *': ''), callback_id: 'new_task',
+		attachment_type: 'default',
+		actions: [
+		  {
+		   'name':user.task_list[x].text,
+		    'text':":waving_black_flag:" + user.task_list[x].text,
+		    'value' : 'flag',
+		    'type': 'button'
+
+		  }
+		]
+
+
+	      })
+	    }
+
+		bot.replyInteractive(message, reply);
+
+			controller.storage.users.save(user);
+			break;
+		}
 
 
    
@@ -195,7 +252,7 @@ controller.hears(['set account', 'login'], 'message_received,direct_mention,dire
 			user =  {
 				id: message.user, 
 				list: [],
-				accountType: "",
+//				accountType: "",
 			}
 		}
 
@@ -290,21 +347,12 @@ console.log("**************** within get account info controller****");
 							]			
 					      }]
 					
-		} 
-
-
-
+				} 
 
 		bot.reply(message, reply);
-	});
-
-
+	     });
 	
-	});//end controller storage query
-
-
-//});
-
+});//end controller storage query
 
 
 /**********************************************************************
@@ -315,100 +363,91 @@ Currently incuding: Docker, AWS, Google Cloud Platform, Azure, Contanerization
 *HOW TO USE: <------(must add to help in order for users to add message appropriately
 *
 *********************************************************************/
-controller.hears(['new task (.*)','add <item>'],'message_received, direct_mention,direct_message',function(bot,message) {
+controller.hears(['new task','add <item>'],'message_received, direct_mention,direct_message',function(bot,message) {
 console.log("*******Made it within new task********************");
+	
 
+
+	controller.storage.users.get(message.user, function(err, user){
+
+	if (!user.task_list || !user.task_list.length) {
+  	user.task_list = [
+          {
+              'id': 1,
+              'text': 'Docker'
+          },
+          {
+              'id': 2,
+              'text': 'Containerization'
+          },
+              {
+                 'id': 3,
+                  'text':'AWS'
+              },
+          {
+              'id': 4,
+              'text': 'Azure'
+          },
+              {
+              'id': 5,
+              'text' : 'Cloud Platforms'
+              }
+	      ]
+	}
+
+	var reply = {text: 'Services', attachments: []}
+	for(var x = 0; x < user.task_list.length; x++)
+	{
+	  reply.attachments.push({
+	    title: user.task_list[x].text + (user.task_list[x].flagged? ' * SELECTED *': ''), callback_id: 'new_task',
+	    attachment_type: 'default',
+	    actions: [
+		  {
+		   'name':user.task_list[x].text,
+		    'text':":waving_black_flag:" + user.task_list[x].text,
+		    'value' : 'flag',
+		    'type': 'button'
+		  
+		  }
+	    ]
+
+	  
+	  })
+	}
+
+/*
 	var services = ["Docker", "AWS", "Azure", "Containerization"];
 
+	var reply = {
+		text: "Select items from this list that are relevant to your task. (currently only supporting tooling shown)",
+		attachments: [],
+	}
 
-/*controller.storage.users.get(user_id, function(err, user) {
-
-        if (!user) {
-            user = {
-                id: user_id,
-                list: []
-            }
-        }
-*/
-/*    controller.storage.users.get(message.user, function(err, user) {
-
-        if (!user) {
-            user = {
-                id: message.user,
-                list: []
-            }
-  
-
-
-      }
-/*
-        user.list.push({
-            id:   message.ts,
-            text: message.match[1],
-        });
-*/
-	/*When Task is created, query node-express-service-1 which also has access to MongoDB running locally in container
-
-	1. Set up node-express-service-1
-	2. Connect node-1 to mongoDB
-	3. when an update happens in mongoDB 
-								
-
-	*/
-
-	var user = { id: message.user, list:[] }
-
-
+	//Display all tooling services supported by Chatops, all button interactions are sent to interactive message callback
+	for(var x = 0; x < services.length; x++)
+	{
+		reply.attachments.push({
 		
-	         var reply = {
-			
-			text: "Please select relevant services",
-			attachments:[],
-		}	
-	
-/*
-		for(var x = 0; x < services.length; x++) {
-                reply.attachments.push({
-                title: services[x],
-                callback_id: message.user + '-' + user.id,
-                attachment_type: 'default',
-                 actions: [
+		title: services[x] + (services[x].flagged? '*Flagged*': ' '),
+		callback_id: 'new_task',
+		attachmentType: 'default',
+		actions: [{ "name":"service",
+				  "text": services[x],
+				  "value" : services[x],
+			          "type" : "button",
+				
+			  }] 
+		})
+	}
+*/	bot.reply(message, reply);
+	controller.storage.users.save(user);
+	});
+});
 
-                    {
-                       "text": "docker",
-                        "name": "docker",
-                        "style": "danger",
-                        "type": "button",
-                        "confirm": {
-                          "title": "Are you sure?",
-                          "text": "This will do something!",
-                          "ok_text": "Yes",
-                          "dismiss_text": "No"
-                        }
-                    }
-                    ]
-                   })
-
-		}
-		console.log("WIthin for Loop " + x);
-*/
-
-	bot.reply(message,reply);
-
-      //controller.storage.users.save(user);
-
-    });
-
-/*controller.hears for help with commands usable with nwi chatops bot
-*/
-
-/*************************************************************
-* User enters help with a direct message or a direct mention
-* 
+/* 
+* This controller method handles help requests
 *
-*
-*****************************************************************/
-
+****************************************************************/
 controller.hears(['help', 'nwi help'], 'message_received, direct_mention, direct_message', function(bot, message) {
 
 	controller.storage.users.get(message.user, function(err, user) {
@@ -416,18 +455,10 @@ controller.hears(['help', 'nwi help'], 'message_received, direct_mention, direct
 	
 	});
 
-
-	//bot.reply(message, '
-
-	
 });
 
 /*
 hears for list and tasks to display current tasks
-
-
-
-
 
 */
 controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,message) {
@@ -440,15 +471,6 @@ controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,m
                 list: []
             }
         }
-/*
-	var service = new function() {
-	
-	
-	}
-
-*/	//var service = { name='Docker', flagged=0 };
-
-
 
 var services = ['Docker', 'AWS', 'Azure', 'Containerization'];	
 
@@ -482,7 +504,7 @@ var services = ['Docker', 'AWS', 'Azure', 'Containerization'];
 		console.log("Within For Loop" + x);
 		console.log(reply.attachments[x]);
         	}
-//	console.log(reply.attachments
+
 
         bot.reply(message, reply);
 
