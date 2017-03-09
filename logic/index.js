@@ -135,8 +135,19 @@ controller.on('interactive_message_callback', function(bot, message) {
 		      }
 		  ]
 	    }			
-			
-*/		for(var x = 0; x < user.task_list.length; x++) {
+		
+	
+*/	console.log("***********Within new_task case *****" + message.actions[0].value + "********");
+
+	
+	var reply = { title: 'A New task has been created', attachments: [ {title: message.actions[0].value}, { title: 'Summary', text: 'We are creating a match with a consultant with relevant skills related to ' + message.actions[0].value } ] }  
+		
+	bot.replyInteractive(message, reply);	
+
+	
+		
+	/*
+	for(var x = 0; x < user.task_list.length; x++) {
 		
 			if(message.actions[0].value=='flag'){
 				if(message.actions[0].value=='flag'){
@@ -157,8 +168,8 @@ controller.on('interactive_message_callback', function(bot, message) {
 		  {
 		   'name':user.task_list[x].text,
 		    'text':":waving_black_flag:" + user.task_list[x].text,
-		    'value' : 'flag',
-		    'type': 'button'
+		    'value' : 'flag'
+		    //'type': 'button'
 
 		  }
 		]
@@ -169,13 +180,15 @@ controller.on('interactive_message_callback', function(bot, message) {
 
 		bot.replyInteractive(message, reply);
 
+		*/
+
+
 			controller.storage.users.save(user);
 			break;
 		}
 
 
-   
-
+ 
 	});
 
 
@@ -395,7 +408,7 @@ console.log("*******Made it within new task********************");
 	      ]
 	}
 
-	var reply = {text: 'Services', attachments: []}
+	var reply = {text: 'Here are the services offered. Enter `create task <service>` to create a task.', attachments: []}
 	for(var x = 0; x < user.task_list.length; x++)
 	{
 	  reply.attachments.push({
@@ -405,7 +418,7 @@ console.log("*******Made it within new task********************");
 		  {
 		   'name':user.task_list[x].text,
 		    'text':":waving_black_flag:" + user.task_list[x].text,
-		    'value' : 'flag',
+		    'value' : user.task_list[x].text,
 		    'type': 'button'
 		  
 		  }
